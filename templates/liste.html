@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+{% block title %}Données — EnquêteNum{% endblock %}
+
+{% block head %}
+<style>
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.page-header h1 {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+}
+.page-header h1 span { color: var(--accent); }
+.stats-bar {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.85rem;
+  color: var(--text2);
+}
+.stats-bar strong { color: var(--text); font-weight: 600; }
+/* FILTRES */
+.filter-card {
+  background: var(--bg2);
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+.filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 140px; }
+.filter-group label { font-size: 0.78rem; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.filter-group input, .filter-group select {
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--bg);
+}
+.filter-group input:focus, .filter-group select:focus { border-color: var(--accent); }
+/* TABLE */
+.table-wrapper {
+  background: var(--bg2);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead {
+  background: var(--primary);
+  color: #fff;
+}
+thead th {
+  padding: 14px 16px;
+  text-align: left;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+}
+thead th a { color: rgba(255,255,255,0.7); text-decoration: none; display: flex; align-items: center; gap: 6px; }
+thead th a:hover { color: #fff; }
+thead th a .sort-icon { font-size: 0.65rem; }
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(233,69,96,0.03); }
+tbody td { padding: 13px 16px; font-size: 0.88rem; color: var(--text); }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-oui { background: #d4f7e7; color: #0a5d34; }
+.badge-non { background: #f5f5f5; color: #777; }
+.badge-m { background: #e8f0fe; color: #1a56db; }
+.badge-f { background: #fde8f4; color: #9d174d; }
+.badge-a { background: #fef3c7; color: #92400e; }
+.app-icons { display: flex; gap: 5px; }
+.app-icons i { font-size: 1rem; opacity: 0.25; }
+.app-icons i.active { opacity: 1; }
+.app-icons .wa { color: #25D366; }
+.app-icons .fb { color: #1877F2; }
+.app-icons .tt { color: #ff0050; }
+/* NO DATA */
+.no-data {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text2);
+}
+.no-data i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.3; }
+.no-data h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; margin-bottom: 0.5rem; }
+/* PAGINATION INFO */
+.table-footer {
+  padding: 1rem 1.5rem;
+  background: var(--bg);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: var(--text2);
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1>Données <span>collectées</span></h1>
+    <p style="color:var(--text2); font-size:0.88rem; margin-top:4px">Visualisez et gérez toutes les réponses</p>
+  </div>
+  <div style="display:flex; gap:10px; align-items:center">
+    <div class="stats-bar">
+      <span>Total : <strong>{{ total }}</strong> réponses</span>
+      <span>Affichés : <strong>{{ data|length }}</strong></span>
+    </div>
+    <a href="/formulaire" class="btn btn-primary"><i class="fas fa-plus"></i> Nouvelle réponse</a>
+    <a href="/dashboard" class="btn btn-secondary"><i class="fas fa-chart-pie"></i> Statistiques</a>
+  </div>
+</div>
+
+<!-- FILTRES -->
+<form method="GET" action="/liste">
+  <div class="filter-card">
+    <div class="filter-group" style="flex:2">
+      <label><i class="fas fa-magnifying-glass"></i> Rechercher</label>
+      <input type="text" name="search" value="{{ search }}" placeholder="Rechercher par nom...">
+    </div>
+    <div class="filter-group">
+      <label>Genre</label>
+      <select name="sexe">
+        <option value="">Tous</option>
+        <option value="Masculin" {{ 'selected' if filtre_sexe == 'Masculin' }}>Masculin</option>
+        <option value="Féminin" {{ 'selected' if filtre_sexe == 'Féminin' }}>Féminin</option>
+        <option value="Autre" {{ 'selected' if filtre_sexe == 'Autre' }}>Autre</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>Niveau</label>
+      <select name="niveau">
+        <option value="">Tous</option>
+        <option value="Primaire" {{ 'selected' if filtre_niveau == 'Primaire' }}>Primaire</option>
+        <option value="Secondaire" {{ 'selected' if filtre_niveau == 'Secondaire' }}>Secondaire</option>
+        <option value="Universitaire" {{ 'selected' if filtre_niveau == 'Universitaire' }}>Universitaire</option>
+        <option value="Aucun" {{ 'selected' if filtre_niveau == 'Aucun' }}>Aucun</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Filtrer</button>
+    {% if search or filtre_sexe or filtre_niveau %}
+    <a href="/liste" class="btn btn-outline"><i class="fas fa-xmark"></i> Réinitialiser</a>
+    {% endif %}
+  </div>
+</form>
+
+<!-- TABLE -->
+<div class="table-wrapper">
+  <div class="table-scroll">
+    {% if data %}
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th><a href="/liste?sort=nom&order={{ 'desc' if sort=='nom' and order=='asc' else 'asc' }}&search={{ search }}&sexe={{ filtre_sexe }}&niveau={{ filtre_niveau }}">Nom <i class="fas fa-sort sort-icon"></i></a></th>
+          <th><a href="/liste?sort=age&order={{ 'desc' if sort=='age' and order=='asc' else 'asc' }}&search={{ search }}&sexe={{ filtre_sexe }}&niveau={{ filtre_niveau }}">Âge <i class="fas fa-sort sort-icon"></i></a></th>
+          <th>Genre</th>
+          <th><a href="/liste?sort=niveau&order={{ 'desc' if sort=='niveau' and order=='asc' else 'asc' }}&search={{ search }}&sexe={{ filtre_sexe }}&niveau={{ filtre_niveau }}">Niveau <i class="fas fa-sort sort-icon"></i></a></th>
+          <th>Smartphone</th>
+          <th>Temps/j</th>
+          <th>Internet</th>
+          <th>Applications</th>
+          <th>Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data %}
+        <tr>
+          <td style="color:var(--text2);font-size:0.78rem">#{{ row['id'] }}</td>
+          <td><strong>{{ row['nom'] }}</strong></td>
+          <td>{{ row['age'] }} ans</td>
+          <td>
+            {% if row['sexe'] == 'Masculin' %}
+              <span class="badge badge-m"><i class="fas fa-mars"></i> M</span>
+            {% elif row['sexe'] == 'Féminin' %}
+              <span class="badge badge-f"><i class="fas fa-venus"></i> F</span>
+            {% else %}
+              <span class="badge badge-a">Autre</span>
+            {% endif %}
+          </td>
+          <td>{{ row['niveau'] }}</td>
+          <td><span class="badge {{ 'badge-oui' if row['smartphone'] == 'Oui' else 'badge-non' }}">{{ row['smartphone'] }}</span></td>
+          <td>{{ row['temps_tel'] }}h</td>
+          <td><span class="badge {{ 'badge-oui' if row['internet'] == 'Oui' else 'badge-non' }}">{{ row['internet'] }}</span></td>
+          <td>
+            <div class="app-icons">
+              <i class="fab fa-whatsapp wa {{ 'active' if row['whatsapp'] == 'Oui' }}" title="WhatsApp"></i>
+              <i class="fab fa-facebook fb {{ 'active' if row['facebook'] == 'Oui' }}" title="Facebook"></i>
+              <i class="fab fa-tiktok tt {{ 'active' if row['tiktok'] == 'Oui' }}" title="TikTok"></i>
+            </div>
+          </td>
+          <td style="font-size:0.78rem; color:var(--text2)">{{ row['date_soumission'][:10] if row['date_soumission'] else '—' }}</td>
+          <td>
+            <form action="/delete/{{ row['id'] }}" method="POST" onsubmit="return confirm('Supprimer cet enregistrement ?')">
+              <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div class="table-footer">
+      <span>{{ data|length }} enregistrement(s) affiché(s) sur {{ total }} au total</span>
+      <a href="/dashboard" style="color:var(--accent); text-decoration:none; font-size:0.82rem"><i class="fas fa-chart-pie"></i> Voir les statistiques →</a>
+    </div>
+    {% else %}
+    <div class="no-data">
+      <i class="fas fa-inbox"></i>
+      <h3>Aucune donnée trouvée</h3>
+      <p style="margin-bottom:1rem">{% if search or filtre_sexe or filtre_niveau %}Aucun résultat pour ces filtres.{% else %}Aucune réponse enregistrée pour le moment.{% endif %}</p>
+      {% if search or filtre_sexe or filtre_niveau %}
+        <a href="/liste" class="btn btn-outline">Effacer les filtres</a>
+      {% else %}
+        <a href="/formulaire" class="btn btn-primary">Ajouter la première réponse</a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

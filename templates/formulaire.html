@@ -1,1 +1,413 @@
+{% extends "base.html" %}
+{% block title %}Formulaire — EnquêteNum{% endblock %}
 
+{% block head %}
+<style>
+.hero {
+  background: var(--primary);
+  border-radius: 20px;
+  padding: 2.5rem;
+  color: #fff;
+  margin-bottom: 2.5rem;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(233,69,96,0.25) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: 30%;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(245,166,35,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.hero h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.hero h1 em { color: var(--accent); font-style: normal; }
+.hero p { color: rgba(255,255,255,0.7); font-size: 0.95rem; position: relative; }
+.progress-bar-container {
+  background: rgba(255,255,255,0.15);
+  height: 4px;
+  border-radius: 2px;
+  margin-top: 1.5rem;
+  position: relative;
+}
+.progress-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.4s ease;
+  width: 0%;
+}
+.progress-label {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.5);
+  margin-top: 6px;
+  position: relative;
+}
+/* FORM CARD */
+.form-card {
+  background: var(--bg2);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.form-section {
+  padding: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+.form-section:last-child { border-bottom: none; }
+.section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1 / -1; }
+label {
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--text2);
+}
+label .req { color: var(--accent); margin-left: 3px; }
+input[type="text"], input[type="number"], select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--bg);
+  transition: all 0.2s;
+  outline: none;
+}
+input:focus, select:focus {
+  border-color: var(--accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(233,69,96,0.1);
+}
+input.invalid { border-color: var(--accent); background: #fff5f6; }
+input.valid { border-color: var(--success); }
+/* RADIO GROUPS */
+.radio-group {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.radio-chip input { display: none; }
+.radio-chip label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  color: var(--text);
+  transition: all 0.2s;
+  user-select: none;
+  font-weight: 400;
+}
+.radio-chip label:hover { border-color: var(--accent); color: var(--accent); }
+.radio-chip input:checked + label {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+/* APPS GRID */
+.apps-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.app-card { text-align: center; }
+.app-card input { display: none; }
+.app-card label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 16px 12px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  color: var(--text2);
+  font-weight: 400;
+}
+.app-card label i { font-size: 1.6rem; }
+.app-card label:hover { border-color: var(--accent); }
+.app-card input:checked + label {
+  border-color: var(--accent);
+  background: rgba(233,69,96,0.05);
+  color: var(--text);
+}
+.app-card input:checked + label i { color: var(--accent); }
+.wa-icon { color: #25D366; }
+.fb-icon { color: #1877F2; }
+.tt-icon { color: #ff0050; }
+/* SUBMIT AREA */
+.submit-area {
+  padding: 2rem;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.submit-info { font-size: 0.82rem; color: var(--text2); }
+.submit-info i { color: var(--success); margin-right: 4px; }
+.btn-submit {
+  background: var(--accent);
+  color: #fff;
+  padding: 13px 32px;
+  border-radius: 50px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px rgba(233,69,96,0.3);
+}
+.btn-submit:hover {
+  background: #c73652;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(233,69,96,0.4);
+}
+.btn-submit:active { transform: translateY(0); }
+/* CONDITIONAL SECTION */
+.conditional { display: none; }
+.conditional.visible { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .apps-grid { grid-template-columns: repeat(3, 1fr); }
+  .hero h1 { font-size: 1.5rem; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <h1>Enquête sur l'<em>Usage Numérique</em></h1>
+  <p>Partagez votre expérience avec les technologies numériques. Toutes les réponses sont anonymisées.</p>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0% complété</div>
+</div>
+
+<div class="form-card">
+  <form action="/submit" method="POST" id="mainForm" novalidate>
+
+    <!-- IDENTITÉ -->
+    <div class="form-section">
+      <div class="section-title"><i class="fas fa-user"></i> Identité</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nom">Nom complet <span class="req">*</span></label>
+          <input type="text" id="nom" name="nom" placeholder="Ex : Jean Dupont" required minlength="2">
+        </div>
+        <div class="form-group">
+          <label for="age">Âge <span class="req">*</span></label>
+          <input type="number" id="age" name="age" placeholder="Ex : 25" min="5" max="100" required>
+        </div>
+        <div class="form-group full">
+          <label>Genre <span class="req">*</span></label>
+          <div class="radio-group">
+            <div class="radio-chip"><input type="radio" name="sexe" id="s1" value="Masculin" required><label for="s1"><i class="fas fa-mars"></i> Masculin</label></div>
+            <div class="radio-chip"><input type="radio" name="sexe" id="s2" value="Féminin"><label for="s2"><i class="fas fa-venus"></i> Féminin</label></div>
+            <div class="radio-chip"><input type="radio" name="sexe" id="s3" value="Autre"><label for="s3"><i class="fas fa-genderless"></i> Autre</label></div>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Niveau d'éducation <span class="req">*</span></label>
+          <div class="radio-group">
+            <div class="radio-chip"><input type="radio" name="niveau" id="n1" value="Primaire" required><label for="n1"><i class="fas fa-book"></i> Primaire</label></div>
+            <div class="radio-chip"><input type="radio" name="niveau" id="n2" value="Secondaire"><label for="n2"><i class="fas fa-graduation-cap"></i> Secondaire</label></div>
+            <div class="radio-chip"><input type="radio" name="niveau" id="n3" value="Universitaire"><label for="n3"><i class="fas fa-university"></i> Universitaire</label></div>
+            <div class="radio-chip"><input type="radio" name="niveau" id="n4" value="Aucun"><label for="n4"><i class="fas fa-minus"></i> Aucun</label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SMARTPHONE -->
+    <div class="form-section">
+      <div class="section-title"><i class="fas fa-mobile-screen"></i> Usage du smartphone</div>
+      <div class="form-group" style="margin-bottom:1.2rem">
+        <label>Possédez-vous un smartphone ? <span class="req">*</span></label>
+        <div class="radio-group" id="smartphoneGroup">
+          <div class="radio-chip"><input type="radio" name="smartphone" id="sp1" value="Oui" required><label for="sp1"><i class="fas fa-check"></i> Oui</label></div>
+          <div class="radio-chip"><input type="radio" name="smartphone" id="sp2" value="Non"><label for="sp2"><i class="fas fa-xmark"></i> Non</label></div>
+        </div>
+      </div>
+      <div class="conditional" id="smartphoneDetails">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="temps_tel">Heures d'utilisation par jour <span class="req">*</span></label>
+            <input type="number" id="temps_tel" name="temps_tel" placeholder="Ex : 3.5" min="0" max="24" step="0.5">
+          </div>
+          <div class="form-group">
+            <label>Accès à Internet <span class="req">*</span></label>
+            <div class="radio-group">
+              <div class="radio-chip"><input type="radio" name="internet" id="i1" value="Oui"><label for="i1"><i class="fas fa-wifi"></i> Oui</label></div>
+              <div class="radio-chip"><input type="radio" name="internet" id="i2" value="Non"><label for="i2"><i class="fas fa-wifi-exclamation"></i> Non</label></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSEAUX SOCIAUX -->
+    <div class="form-section">
+      <div class="section-title"><i class="fas fa-share-nodes"></i> Réseaux sociaux</div>
+      <p style="font-size:0.85rem; color:var(--text2); margin-bottom:1.2rem">Utilisez-vous les applications suivantes ?</p>
+      <div class="apps-grid">
+        <div class="app-card">
+          <input type="radio" name="whatsapp" id="wa_oui" value="Oui" required>
+          <label for="wa_oui"><i class="fab fa-whatsapp wa-icon"></i> WhatsApp<br><small>Oui</small></label>
+        </div>
+        <div class="app-card">
+          <input type="radio" name="facebook" id="fb_oui" value="Oui" required>
+          <label for="fb_oui"><i class="fab fa-facebook fb-icon"></i> Facebook<br><small>Oui</small></label>
+        </div>
+        <div class="app-card">
+          <input type="radio" name="tiktok" id="tt_oui" value="Oui" required>
+          <label for="tt_oui"><i class="fab fa-tiktok tt-icon"></i> TikTok<br><small>Oui</small></label>
+        </div>
+        <div class="app-card">
+          <input type="radio" name="whatsapp" id="wa_non" value="Non">
+          <label for="wa_non"><i class="fab fa-whatsapp" style="color:var(--border)"></i> WhatsApp<br><small>Non</small></label>
+        </div>
+        <div class="app-card">
+          <input type="radio" name="facebook" id="fb_non" value="Non">
+          <label for="fb_non"><i class="fab fa-facebook" style="color:var(--border)"></i> Facebook<br><small>Non</small></label>
+        </div>
+        <div class="app-card">
+          <input type="radio" name="tiktok" id="tt_non" value="Non">
+          <label for="tt_non"><i class="fab fa-tiktok" style="color:var(--border)"></i> TikTok<br><small>Non</small></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-area">
+      <div class="submit-info">
+        <i class="fas fa-shield-halved"></i> Vos données sont protégées et utilisées à des fins de recherche uniquement.
+      </div>
+      <button type="submit" class="btn-submit">
+        <i class="fas fa-paper-plane"></i> Soumettre ma réponse
+      </button>
+    </div>
+
+  </form>
+</div>
+
+<script>
+const form = document.getElementById('mainForm');
+const progressBar = document.getElementById('progressBar');
+const progressLabel = document.getElementById('progressLabel');
+const REQUIRED_FIELDS = ['nom', 'age', 'sexe', 'niveau', 'smartphone', 'whatsapp', 'facebook', 'tiktok'];
+
+function updateProgress() {
+  let filled = 0;
+  REQUIRED_FIELDS.forEach(name => {
+    const inputs = form.querySelectorAll(`[name="${name}"]`);
+    if (inputs.length > 0) {
+      if (inputs[0].type === 'radio') {
+        if (form.querySelector(`[name="${name}"]:checked`)) filled++;
+      } else {
+        if (inputs[0].value.trim()) filled++;
+      }
+    }
+  });
+  const pct = Math.round((filled / REQUIRED_FIELDS.length) * 100);
+  progressBar.style.width = pct + '%';
+  progressLabel.textContent = pct + '% complété';
+}
+
+document.querySelectorAll('input[name="smartphone"]').forEach(r => {
+  r.addEventListener('change', () => {
+    const details = document.getElementById('smartphoneDetails');
+    if (r.value === 'Oui' && r.checked) {
+      details.classList.add('visible');
+      document.getElementById('temps_tel').required = true;
+    } else if (r.value === 'Non' && r.checked) {
+      details.classList.remove('visible');
+      document.getElementById('temps_tel').required = false;
+    }
+    updateProgress();
+  });
+});
+
+form.querySelectorAll('input, select').forEach(el => {
+  el.addEventListener('change', updateProgress);
+  el.addEventListener('input', updateProgress);
+});
+
+// Validation simple
+form.addEventListener('submit', e => {
+  let valid = true;
+  const nom = document.getElementById('nom');
+  if (!nom.value.trim() || nom.value.trim().length < 2) {
+    nom.classList.add('invalid');
+    valid = false;
+  } else {
+    nom.classList.remove('invalid');
+    nom.classList.add('valid');
+  }
+  const age = document.getElementById('age');
+  const ageVal = parseInt(age.value);
+  if (!age.value || ageVal < 5 || ageVal > 100) {
+    age.classList.add('invalid');
+    valid = false;
+  } else {
+    age.classList.remove('invalid');
+    age.classList.add('valid');
+  }
+  if (!valid) {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+</script>
+{% endblock %}
