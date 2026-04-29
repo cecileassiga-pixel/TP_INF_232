@@ -7,8 +7,8 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-import os
-DB_PATH = os.path.join(os.environ.get("TMPDIR", "/tmp"), "database.db")
+import tempfile, os
+DB_PATH = os.path.join(tempfile.gettempdir(), "database.db")
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
