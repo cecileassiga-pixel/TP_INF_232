@@ -2,12 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, f
 import sqlite3
 import os
 import re
+import tempfile
 from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = os.urandom(24)
+app.secret_key = "enquetenum_secret_2025"
 
-import tempfile, os
 DB_PATH = os.path.join(tempfile.gettempdir(), "database.db")
 
 def get_db():
