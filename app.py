@@ -8,7 +8,7 @@ from datetime import datetime
 app = Flask(__name__)
 app.secret_key = "enquetenum_secret_2025"
 
-DB_PATH = os.path.join(tempfile.gettempdir(), "database.db")
+DB_PATH = os.path.join(os.getcwd(), "database.db")
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -78,6 +78,7 @@ def formulaire():
 
 @app.route('/submit', methods=['POST'])
 def submit():
+    init_db()
     errors = validate_form(request.form)
     if errors:
         for e in errors:
